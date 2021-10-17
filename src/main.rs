@@ -1,25 +1,48 @@
-use std::{borrow::Cow, fs};
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 mod lexer;
 
 fn main() {
-    let source_code = fs::read_to_string("test.firework").unwrap();
-    let mut lexer = lexer::Lexer::new(&Cow::Borrowed(&source_code));
-
-    for _ in 0..(&source_code).len() {
-        lexer.read_next_token()
+    let mut rl = Editor::<()>::new();
+    loop {
+        let readline = rl.readline("🎆 >> ");
+        match readline {
+            Ok(line) => {
+                rl.add_history_entry(line.as_str());
+                if !line.is_empty() {
+                    let mut lexer = lexer::Lexer::new(&line);
+                    lexer.lex();
+                    println!("{:?}", lexer.tokens);
+                } else {
+                    print!("");
+                }
+            }
+            Err(ReadlineError::Interrupted) => {
+                println!("CTRL-C");
+                break;
+            }
+            Err(ReadlineError::Eof) => {
+                println!("CTRL-D");
+                break;
+            }
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+        }
     }
-    println!("{:?}", &lexer.tokens)
+    rl.save_history("history.txt").unwrap();
 }
 
 #[test]
-fn test() {
+fn read_from_file() {
     use lexer::Token::*;
-    let source_code = fs::read_to_string("test.firework").unwrap();
-    let mut lexer = lexer::Lexer::new(&Cow::Borrowed(&source_code));
+    use std::fs;
 
-    for _ in 0..(&source_code).len() {
-        lexer.read_next_token()
-    }
+    let source_code = fs::read_to_string("test.firework").unwrap();
+    let mut lexer = lexer::Lexer::new(&source_code);
+
+    lexer.lex();
 
     assert_eq!(
         lexer.tokens,
@@ -36,4 +59,21 @@ fn test() {
         ]
         .repeat(200)
     )
+}
+
+#[test]
+fn whitespace() {
+    let whitespace = "33 + 6 - (1 * 4)";
+    let no_whitespace: &str = &whitespace
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>();
+
+    let mut lexer_whitespace = lexer::Lexer::new(whitespace);
+    let mut lexer_no_whitespace = lexer::Lexer::new(no_whitespace);
+
+    lexer_whitespace.lex();
+    lexer_no_whitespace.lex();
+
+    assert_eq!(lexer_whitespace.tokens, lexer_no_whitespace.tokens);
 }
