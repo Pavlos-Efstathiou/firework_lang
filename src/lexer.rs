@@ -13,10 +13,14 @@ pub enum Token {
 
 #[derive(Debug)]
 pub struct Lexer {
-    pub source_code: String,
-    pub current_char: char,
-    pub position: usize,
+    source_code: String,
+    current_char: char,
+    position: usize,
     pub tokens: Vec<Token>,
+}
+
+impl Drop for Lexer {
+    fn drop(&mut self) {}
 }
 
 impl Lexer {
@@ -30,19 +34,18 @@ impl Lexer {
     }
 
     pub fn lex(&mut self) {
-        for _ in 0..(self.source_code.len()) {
-            self.next_token();
-        }
+        (0..self.source_code.len()).for_each(|_| self.next_token())
     }
 
     #[allow(dead_code)]
-    pub fn next_char(&self) -> char {
+    fn next_char(&self) -> char {
         return self.source_code.chars().nth(self.position).unwrap();
     }
 
-    pub fn next_token(&mut self) {
+    fn next_token(&mut self) {
         if self.position < self.source_code.len() {
             self.current_char = self.source_code.chars().nth(self.position).unwrap();
+
             let current_token: Token = match self.current_char {
                 curr if curr.is_digit(10) => Token::Number(0),
                 curr if curr.is_whitespace() => Token::Whitespace,
