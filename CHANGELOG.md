@@ -16,3 +16,7 @@ All noteworth changes to this project will be mentioned in this file.
 - Added benches and configures tests properly
 - Made `Lexer::lex` more functional
 - Minor changes
+
+## v0.1.3 | 18/10/2021
+### Changes
+- Switched to pest for parsing and lexing

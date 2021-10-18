@@ -1,0 +1,26 @@
+WHITESPACE = _{ " " | "\t" }
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ ANY* }
+
+fn_name = @{ (ASCII_ALPHA | "_")+ }
+
+fn_args = { (ASCII_ALPHA | "_")+ }
+
+fn_value = { int | boolean | string | char_type | float | lambda }
+
+int = @{ ASCII_DIGIT+ }
+
+float = @{ int ~ "." ~ int } 
+
+boolean = { "true" | "false" }
+
+string = { "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+
+char_type = { "'" ~ (!"'" ~ ANY)? ~ "'" }
+
+declaration = { "let" ~ fn_name ~ fn_args? ~ "=" ~ fn_value }
+
+lambda = { "(" ~ fn_args? ~ ")" ~ "->" ~ fn_value }
+
+expr = { (int | boolean | string | char_type | float | lambda | declaration) }
+
+file = { SOI ~ (expr+ ~ NEWLINE?)* ~ EOI }
