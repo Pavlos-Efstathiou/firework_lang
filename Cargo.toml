@@ -1,6 +1,6 @@
 [package]
 name = "firework_lang"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2018"
 authors = ["Pavlos-Efstathiou"]
 
@@ -8,3 +8,4 @@ authors = ["Pavlos-Efstathiou"]
 pest = "2"
 pest_derive = "2"
 rustyline = "9"
+lazy_static = "*"

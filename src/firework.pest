@@ -1,26 +1,42 @@
 WHITESPACE = _{ " " | "\t" }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ ANY* }
 
-fn_name = @{ (ASCII_ALPHA | "_")+ }
+ARROW = _{ "->" }
+LPAREN = _{ "(" }
+RPAREN = _{ ")" }
+REVERSE_ARROW = _{ "<-" }
 
-fn_args = { (ASCII_ALPHA | "_")+ }
+name_char = _{ ASCII_ALPHA | "_" }
 
-fn_value = { int | boolean | string | char_type | float | lambda }
+name = @{ name_char+ }
 
-int = @{ ASCII_DIGIT+ }
+// Types 
+firework_type = @{ (name_char | ASCII_DIGIT)+ }
 
-float = @{ int ~ "." ~ int } 
+type_signature = { ":" ~ (firework_type ~ (ARROW ~ firework_type)+?)}
+
+int = @{ "-"? ~ ASCII_DIGIT+ }
 
 boolean = { "true" | "false" }
 
-string = { "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 
-char_type = { "'" ~ (!"'" ~ ANY)? ~ "'" }
+char = @{ "'" ~ (!"'" ~ ANY)? ~ "'" }
 
-declaration = { "let" ~ fn_name ~ fn_args? ~ "=" ~ fn_value }
+literal = { int | boolean | string | char | anon_fn }
 
-lambda = { "(" ~ fn_args? ~ ")" ~ "->" ~ fn_value }
+identifier = { name }
 
-expr = { (int | boolean | string | char_type | float | lambda | declaration) }
+// Functions 
+fn_args = { (name ~ type_signature)+ }
 
-file = { SOI ~ (expr+ ~ NEWLINE?)* ~ EOI }
+fn_arg_list = _{ (LPAREN ~ fn_args ~ RPAREN)? }
+
+declaration = { "let" ~ name ~ fn_arg_list ~ type_signature ~ REVERSE_ARROW ~ (identifier | literal) }
+
+anon_fn = { LPAREN ~ fn_args? ~ RPAREN ~ type_signature ~ ARROW ~ (identifier | literal) }
+
+// File
+expr = _{ declaration |  literal | identifier | anon_fn }
+
+file = _{ SOI ~ (expr+ ~ NEWLINE?)* ~ EOI }
