@@ -1,12 +1,12 @@
 [package]
 name = "firework_lang"
 version = "0.1.5"
-edition = "2018"
+edition = "2021"
 authors = ["Pavlos-Efstathiou"]
 
 [dependencies]
 pest = "2"
 pest_derive = "2"
 rustyline = "9"
-lazy_static = "*"
+# Will be used later
 inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master", features = ["llvm12-0"] }

@@ -1,7 +1,9 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-## v0.1.1 | 17/10/2021
+[Latest Version](#v0.1.5)
+
+## v0.1.1
 ### Changes
 - Added [rustyline](https://crates.io/crates/rustyline/) to dependencies
 - Added lexer REPL
@@ -11,17 +13,17 @@ All noteworth changes to this project will be mentioned in this file.
 - Added another test
 - Followed Clippy's sugestions
 
-## v0.1.2 | 18/10/2021
+## v0.1.2
 ### Changes 
 - Added benches and configures tests properly
 - Made `Lexer::lex` more functional
 - Minor changes
 
-## v0.1.3 | 18/10/2021
+## v0.1.3
 ### Changes
 - Switched to pest for parsing and lexing
 
-# v0.1.4 | 18/10/2021
+# v0.1.4
 ### Changes
 - Added a `DefinitionMap` type for storing function definitions
 - You can access global function definitions (sort of)
@@ -31,5 +33,17 @@ All noteworth changes to this project will be mentioned in this file.
 - Changed the rules for strings and chars
 - Added anonymous functions
 
-# Upcoming features
-- A compiler
+# v0.1.5
+### Changes
+- Removed DefinitionMap
+- Added a custom AST
+- The ```parser``` and ```compiler``` crates
+- Remove ```lazy_static``` ```Cargo.toml```'s dependencies
+- Added ```inkwell``` to ```Cargo.toml```'s dependencies
+- Switched to Rust 2021
+
+## Upcoming features
+- [ ] Compiler
+- [ ] Type System
+- [ ] Operators
+- [ ] Keywords

@@ -1,5 +1,5 @@
 use self::AstNode::*;
-use crate::parser::{FireworkParser, Rule};
+use super::{FireworkParser, Rule};
 use pest::error::Error;
 use pest::iterators::Pair;
 use pest::Parser;
@@ -18,7 +18,6 @@ pub enum AstNode {
         return_type: Box<self::AstNode>,
         value: Box<self::AstNode>,
     },
-
     Fn {
         name: String,
         return_type: Box<self::AstNode>,
@@ -64,38 +63,49 @@ fn build_ast(pair: Pair<Rule>) -> AstNode {
             FnArgs(
                 args.iter()
                     .cloned()
-                    .zip(types.iter())
-                    .map(|(a, b)| (a, b.clone()))
+                    .zip(types.iter().cloned())
                     .collect::<Vec<(_, _)>>(),
             )
         }
         Rule::declaration => {
-            let mut _pair = pair.into_inner();
-            let name = _pair.next().unwrap();
-            let arg_or_type = _pair.next().unwrap();
+            let mut inner_pair = pair.into_inner();
+            let name = inner_pair.next().unwrap();
+            let args_or_type = inner_pair.next().unwrap();
 
-            if let Rule::fn_args = arg_or_type.as_rule() {
+            if let Rule::fn_args = args_or_type.as_rule() {
                 Fn {
                     name: name.as_str().to_string(),
-                    args: Box::new(build_ast(arg_or_type)),
-                    return_type: Box::new(build_ast(_pair.next().unwrap())),
-                    value: Box::new(build_ast(_pair.next().unwrap())),
+                    args: Box::new(build_ast(args_or_type)),
+                    return_type: Box::new(build_ast(inner_pair.next().unwrap())),
+                    value: Box::new(build_ast(inner_pair.next().unwrap())),
                 }
             } else {
                 Fn {
                     name: name.as_str().to_string(),
                     args: Box::new(AstNode::FnArgs(Vec::new())),
-                    return_type: Box::new(build_ast(arg_or_type)),
-                    value: Box::new(build_ast(_pair.next().unwrap())),
+                    return_type: Box::new(build_ast(args_or_type)),
+                    value: Box::new(build_ast(inner_pair.next().unwrap())),
                 }
             }
         }
-        // Placeholder because pest can't parse anonymous functions :/
-        Rule::anon_fn => AnonFn {
-            args: Box::new(FnArgs(Vec::new())),
-            return_type: Box::new(Type("".to_string())),
-            value: Box::new(Boolean(false)),
-        },
+        Rule::anon_fn => {
+            let mut inner_pair = pair.into_inner();
+            let args_or_type = inner_pair.next().unwrap();
+
+            if let Rule::fn_args = args_or_type.as_rule() {
+                AnonFn {
+                    args: Box::new(build_ast(args_or_type)),
+                    return_type: Box::new(build_ast(inner_pair.next().unwrap())),
+                    value: Box::new(build_ast(inner_pair.next().unwrap())),
+                }
+            } else {
+                AnonFn {
+                    args: Box::new(FnArgs(Vec::new())),
+                    return_type: Box::new(build_ast(args_or_type)),
+                    value: Box::new(build_ast(inner_pair.next().unwrap())),
+                }
+            }
+        }
         Rule::expr => build_ast(pair.into_inner().next().unwrap()),
         Rule::EOI => Eoi,
         _ => unreachable!(),
