@@ -1,21 +1,24 @@
-#[derive(Debug, Copy, Clone)]
-pub enum Types<'a> {
-    String(&'a str),
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub enum Types {
+    String(String),
     Int(i128),
     Char(char),
     Boolean(bool),
 }
 
-pub struct DefinitionMap<'a> {
-    elems: Vec<(String, Types<'a>)>,
+#[derive(Debug)]
+pub struct DefinitionMap {
+    elems: Vec<(String, Types)>,
 }
 
-impl<'a> DefinitionMap<'a> {
+#[allow(dead_code)]
+impl DefinitionMap {
     pub fn new() -> Self {
         Self { elems: Vec::new() }
     }
 
-    pub fn insert(&mut self, key: String, value: Types<'a>) {
+    pub fn insert(&mut self, key: String, value: Types) {
         match self.get(key.to_owned()) {
             None => self.elems.push((key, value)),
             Some(_) => {}
@@ -40,5 +43,15 @@ impl<'a> DefinitionMap<'a> {
 
     pub fn len(&self) -> usize {
         self.elems.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.elems.is_empty()
+    }
+}
+
+impl Default for DefinitionMap {
+    fn default() -> Self {
+        Self::new()
     }
 }

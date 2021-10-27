@@ -4,16 +4,21 @@ COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ ANY* }
 ARROW = _{ "->" }
 LPAREN = _{ "(" }
 RPAREN = _{ ")" }
-REVERSE_ARROW = _{ "<-" }
+COLON = _{ ":" }
+EQ = _{ "=" }
 
 name_char = _{ ASCII_ALPHA | "_" }
 
 name = @{ name_char+ }
 
+fn_name = { ASCII_ALPHANUMERIC+ }
+
 // Types 
 firework_type = @{ (name_char | ASCII_DIGIT)+ }
 
-type_signature = { ":" ~ (firework_type ~ (ARROW ~ firework_type)+?)}
+type_signature = { COLON ~ firework_type }
+
+return_type = { ARROW ~ firework_type }
 
 int = @{ "-"? ~ ASCII_DIGIT+ }
 
@@ -30,13 +35,13 @@ identifier = { name }
 // Functions 
 fn_args = { (name ~ type_signature)+ }
 
-fn_arg_list = _{ (LPAREN ~ fn_args ~ RPAREN)? }
+declaration = { "let" ~ fn_name ~ (LPAREN ~ fn_args ~ RPAREN)? ~ return_type ~ EQ ~ expr }
 
-declaration = { "let" ~ name ~ fn_arg_list ~ type_signature ~ REVERSE_ARROW ~ (identifier | literal) }
-
-anon_fn = { LPAREN ~ fn_args? ~ RPAREN ~ type_signature ~ ARROW ~ (identifier | literal) }
+anon_fn = { LPAREN ~ fn_args? ~ RPAREN ~ return_type ~ ARROW ~ expr }
 
 // File
-expr = _{ declaration |  literal | identifier | anon_fn }
+expr = _{ literal | identifier | anon_fn }
 
-file = _{ SOI ~ (expr+ ~ NEWLINE?)* ~ EOI }
+stmt = _{ declaration | expr }
+
+program = _{ SOI ~ (stmt+)* ~ EOI }
