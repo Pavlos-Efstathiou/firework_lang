@@ -4,6 +4,10 @@ version = "0.2.0"
 edition = "2021"
 authors = ["Pavlos-Efstathiou"]
 description = "Firework Programming Language"
+license = "GPL 3.0"
+repository = "https://github.com/Pavlos-Efstathiou/firework_lang"
+readme = "README.md"
+keywords = ["programming_language"]
 
 [dependencies]
 pest = "2"
