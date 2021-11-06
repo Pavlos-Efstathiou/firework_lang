@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.1.5)
+[Latest Version](#v0.2.0)
 
 ## v0.1.1
 ### Changes
@@ -42,8 +42,11 @@ All noteworth changes to this project will be mentioned in this file.
 - Added ```inkwell``` to ```Cargo.toml```'s dependencies
 - Switched to Rust 2021
 
-## Upcoming features
-- [ ] Compiler
-- [ ] Type System
-- [ ] Operators
-- [ ] Keywords
+# v0.2.0
+### Changes
+- Added a primitive build system
+- Added Enums, If Statements, Module Imports and Declarations, Function Arguments
+- Added a ~~```compiler```~~ ```transpiler``` crate
+- Added some tests
+- Remove ```rustyline``` and ```inkwell``` from this projects dependencies
+- Many more changes!

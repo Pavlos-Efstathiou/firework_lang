@@ -4,15 +4,28 @@ use pest::error::Error;
 use pest::iterators::Pair;
 use pest::Parser;
 
+pub type AST = Vec<AstNode>;
+
 #[derive(Debug, Clone)]
 pub enum AstNode {
     Str(String),
-    Int(i128),
+    Int(i64),
     Char(char),
     Boolean(bool),
-    Identifier(String),
+
     Type(String),
     FnArgs(Vec<(self::AstNode, self::AstNode)>),
+    ModuleImport(Box<self::AstNode>),
+    ModuleDeclaration(Box<self::AstNode>),
+    Module(String),
+    Identifier {
+        name: String,
+        args: Vec<self::AstNode>,
+    },
+    Enum {
+        name: Box<self::AstNode>,
+        variants: Vec<self::AstNode>,
+    },
     AnonFn {
         args: Box<self::AstNode>,
         return_type: Box<self::AstNode>,
@@ -24,32 +37,49 @@ pub enum AstNode {
         args: Box<self::AstNode>,
         value: Box<self::AstNode>,
     },
+    IfElse {
+        condition: Box<self::AstNode>,
+        stmt_true: Box<self::AstNode>,
+        stmt_false: Box<self::AstNode>,
+    },
     Eoi,
 }
 
-pub fn parse(input: &str) -> Result<Vec<AstNode>, Error<Rule>> {
-    let mut ast = vec![];
-    let pairs = FireworkParser::parse(Rule::program, input)?;
-
-    for pair in pairs {
-        ast.push(build_ast(pair));
-    }
-    Ok(ast)
+pub fn parse(input: &str) -> Result<AST, Error<Rule>> {
+    Ok(FireworkParser::parse(Rule::program, input)?
+        .into_iter()
+        .map(build_ast)
+        .collect::<AST>())
 }
 
 fn build_ast(pair: Pair<Rule>) -> AstNode {
     match pair.as_rule() {
-        Rule::name => Identifier(pair.as_str().to_string()),
-        Rule::fn_name => Identifier(pair.as_str().to_string()),
+        Rule::name => Identifier {
+            name: pair.as_str().to_string(),
+            args: vec![],
+        },
         Rule::firework_type => Type(pair.as_str().to_string()),
         Rule::type_signature => build_ast(pair.into_inner().next().unwrap()),
-        Rule::return_type => build_ast(pair.into_inner().next().unwrap()),
         Rule::int => Int(pair.as_str().parse().unwrap()),
         Rule::boolean => Boolean(pair.as_str().parse().unwrap()),
         Rule::string => Str(pair.as_str().to_string().replace("\"", "")),
         Rule::char => Char(pair.as_str().chars().nth(1).unwrap()),
         Rule::literal => build_ast(pair.into_inner().next().unwrap()),
-        Rule::identifier => Identifier(pair.as_str().to_string()),
+        Rule::identifier => {
+            let mut inner_pair = pair.into_inner();
+            Identifier {
+                name: inner_pair.next().unwrap().as_str().to_string(),
+                args: inner_pair.map(build_ast).collect::<Vec<AstNode>>(),
+            }
+        }
+        Rule::enum_type => {
+            let mut inner_pair = pair.into_inner();
+
+            Enum {
+                name: Box::new(build_ast(inner_pair.next().unwrap())),
+                variants: inner_pair.map(build_ast).collect::<Vec<_>>(),
+            }
+        }
         Rule::fn_args => {
             let mut args: Vec<AstNode> = vec![];
             let mut types: Vec<AstNode> = vec![];
@@ -106,8 +136,28 @@ fn build_ast(pair: Pair<Rule>) -> AstNode {
                 }
             }
         }
+        Rule::module_name => Identifier {
+            name: pair.as_str().to_string(),
+            args: vec![],
+        },
+        Rule::module_import => ModuleImport(Box::new(Module(
+            pair.into_inner().next().unwrap().as_str().to_string(),
+        ))),
+        Rule::module_declaration => ModuleDeclaration(Box::new(Module(
+            pair.into_inner().next().unwrap().as_str().to_string(),
+        ))),
+
+        Rule::if_statement => {
+            let mut inner_pair = pair.into_inner();
+            IfElse {
+                condition: Box::new(build_ast(inner_pair.next().unwrap())),
+                stmt_true: Box::new(build_ast(inner_pair.next().unwrap())),
+                stmt_false: Box::new(build_ast(inner_pair.next().unwrap())),
+            }
+        }
         Rule::expr => build_ast(pair.into_inner().next().unwrap()),
         Rule::EOI => Eoi,
+
         _ => unreachable!(),
     }
 }

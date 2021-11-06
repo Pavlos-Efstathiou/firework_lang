@@ -1,40 +1,26 @@
-#[macro_use]
-extern crate pest_derive;
-extern crate pest;
-use parser::ast;
-use rustyline::error::ReadlineError;
-use rustyline::Editor;
+use clap::{App, AppSettings, Arg, SubCommand};
 
-mod parser;
+use firework_lang::build_system::FireworkProject;
 
 fn main() {
-    let mut rl = Editor::<()>::new();
+    let clap_app = App::new("Firework")
+        .setting(AppSettings::ArgRequiredElseHelp)
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .subcommand(SubCommand::with_name("new").arg(Arg::with_name("project").takes_value(true)))
+        .subcommand(SubCommand::with_name("run").help("Runs firework project"));
 
-    rl.load_history("history.txt")
-        .unwrap_or_else(|_| println!("Coudn't run history"));
+    let matches = clap_app.get_matches();
+    let project = FireworkProject::new();
 
-    loop {
-        let readline = rl.readline("🎆 >> ");
-        match readline {
-            Ok(line) => {
-                if !line.is_empty() {
-                    rl.add_history_entry(&line);
-                    println!("{:#?}", ast::parse(&line));
-                }
-            }
-            Err(ReadlineError::Interrupted) => {
-                println!("CTRL-C");
-                break;
-            }
-            Err(ReadlineError::Eof) => {
-                println!("CTRL-D");
-                break;
-            }
-            Err(err) => {
-                println!("Error: {:?}", err);
-                break;
+    match matches.subcommand() {
+        ("run", _) => project.run().unwrap_or_else(|err| panic!("{}", err)),
+        ("new", Some(matches)) => {
+            if let Some(project_name) = matches.value_of("project") {
+                project.new_project(project_name)
             }
         }
+        _ => {}
     }
-    rl.save_history("history.txt").unwrap();
 }

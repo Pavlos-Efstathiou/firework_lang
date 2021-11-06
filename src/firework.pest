@@ -1,5 +1,5 @@
 WHITESPACE = _{ " " | "\t" }
-COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ ANY* }
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" ~ NEWLINE? }
 
 ARROW = _{ "->" }
 LPAREN = _{ "(" }
@@ -11,14 +11,14 @@ name_char = _{ ASCII_ALPHA | "_" }
 
 name = @{ name_char+ }
 
-fn_name = { ASCII_ALPHANUMERIC+ }
+module_name = @{ (name_char | "::")+ }
 
 // Types 
-firework_type = @{ (name_char | ASCII_DIGIT)+ }
+type_char = _{ name_char | ASCII_DIGIT }
+
+firework_type = @{ type_char+ ~ ("()")? }
 
 type_signature = { COLON ~ firework_type }
-
-return_type = { ARROW ~ firework_type }
 
 int = @{ "-"? ~ ASCII_DIGIT+ }
 
@@ -28,20 +28,30 @@ string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 
 char = @{ "'" ~ (!"'" ~ ANY)? ~ "'" }
 
+enum_type = { "enum" ~ name ~ EQ ~ name ~ ("|" ~ name)+?}
+
 literal = { int | boolean | string | char | anon_fn }
 
-identifier = { name }
+identifier = { name ~ expr+? }
 
 // Functions 
 fn_args = { (name ~ type_signature)+ }
 
-declaration = { "let" ~ fn_name ~ (LPAREN ~ fn_args ~ RPAREN)? ~ return_type ~ EQ ~ expr }
+declaration = { "let" ~ name ~ (LPAREN ~ fn_args ~ RPAREN)? ~ type_signature ~ EQ ~ expr }
 
-anon_fn = { LPAREN ~ fn_args? ~ RPAREN ~ return_type ~ ARROW ~ expr }
+anon_fn = { LPAREN ~ fn_args? ~ RPAREN ~ type_signature ~ ARROW ~ expr }
+
+// Modules
+module_import = { "import" ~  module_name }
+
+module_declaration = { "module" ~ module_name }
+
+// If statements
+if_statement = { "if" ~ expr ~ expr ~ "else" ~ expr }
 
 // File
-expr = _{ literal | identifier | anon_fn }
+expr = _{ literal | identifier | if_statement }
 
-stmt = _{ declaration | expr }
+stmt = _{ (declaration | module_declaration | module_import | enum_type) }
 
-program = _{ SOI ~ (stmt+)* ~ EOI }
+program = _{ SOI ~ (stmt ~ NEWLINE?)* ~ EOI }
