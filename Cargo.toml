@@ -7,7 +7,7 @@ description = "Firework Programming Language"
 license = "GPL-3.0"
 repository = "https://github.com/Pavlos-Efstathiou/firework_lang"
 readme = "README.md"
-keywords = ["programming_language"]
+keywords = ["programming-language", "firework"]
 
 [dependencies]
 pest = "2"
