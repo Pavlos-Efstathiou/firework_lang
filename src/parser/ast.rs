@@ -12,7 +12,6 @@ pub enum AstNode {
     Int(i64),
     Char(char),
     Boolean(bool),
-
     Type(String),
     FnArgs(Vec<(self::AstNode, self::AstNode)>),
     ModuleImport(Box<self::AstNode>),
@@ -47,6 +46,13 @@ pub enum AstNode {
 
 pub fn parse(input: &str) -> Result<AST, Error<Rule>> {
     Ok(FireworkParser::parse(Rule::program, input)?
+        .into_iter()
+        .map(build_ast)
+        .collect::<AST>())
+}
+
+pub fn parse_repl(input: &str) -> Result<AST, Error<Rule>> {
+    Ok(FireworkParser::parse(Rule::repl, input)?
         .into_iter()
         .map(build_ast)
         .collect::<AST>())

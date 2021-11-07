@@ -54,4 +54,6 @@ expr = _{ literal | identifier | if_statement }
 
 stmt = _{ (declaration | module_declaration | module_import | enum_type) }
 
+repl = _{ SOI ~ (stmt | expr ~ NEWLINE?)* ~ EOI }
+
 program = _{ SOI ~ (stmt ~ NEWLINE?)* ~ EOI }

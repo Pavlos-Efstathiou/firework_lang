@@ -34,7 +34,13 @@ impl Transpiler {
             AstNode::Boolean(x) => x.to_string(),
             AstNode::Char(x) => format!("{:?}", x),
             AstNode::Type(x) => x,
-            AstNode::Int(x) => x.to_string(),
+            AstNode::Int(x) => {
+                if x.is_negative() {
+                    format!("({})", x)
+                } else {
+                    x.to_string()
+                }
+            }
             AstNode::Module(x) => x,
             AstNode::ModuleDeclaration(x) => {
                 format!("module {} where", self.transpile_ast_node(*x))

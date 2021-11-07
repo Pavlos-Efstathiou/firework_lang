@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.2.0)
+[Latest Version](#v0.2.2)
 
 ## v0.1.1
 ### Changes
@@ -50,3 +50,18 @@ All noteworth changes to this project will be mentioned in this file.
 - Added some tests
 - Remove ```rustyline``` and ```inkwell``` from this projects dependencies
 - Many more changes!
+
+# v0.2.1
+### Changes
+- Added keywords to Cargo.toml
+- Updated README.MD
+
+# v0.2.2
+### Changes
+- Added the repl subcommands which runs a REPL (Read-Eval-Print Loop)
+- Added the build subcommand which build a project
+- The run subcommand now builds and runs a project
+- Fixed transpiling negative numbers
+- Renamed build_system to firework_project
+- Added more tests
+- Switched back to Rust 2018

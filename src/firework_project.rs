@@ -1,5 +1,6 @@
 use indoc::formatdoc;
-use std::fs;
+use std::process::Command;
+use std::{env, fs};
 
 use crate::parser::ast::parse;
 use crate::transpiler::transpile::Transpiler;
@@ -17,14 +18,13 @@ impl FireworkProject {
     pub fn new() -> Self {
         Self {}
     }
+
     pub fn new_project(&self, project_name: &str) {
         self.create_project(project_name)
-            .unwrap_or_else(|err| println!("{}", err));
+            .unwrap_or_else(|err| panic!("{}", err));
     }
 
-    pub fn run(&self) -> std::io::Result<()> {
-        println!("Running src/main.firework");
-
+    pub fn build(&self) -> std::io::Result<()> {
         let main = fs::read_to_string("src/main.firework")
             .unwrap_or_else(|_| panic!("Couldn't read src/main.firework or project not found"));
         let transpiler = Transpiler::default();
@@ -44,6 +44,21 @@ impl FireworkProject {
         )?;
         transpiler.compile();
 
+        Ok(())
+    }
+
+    pub fn run(&self) -> std::io::Result<()> {
+        self.build().unwrap_or_else(|err| panic!("{}", err));
+        env::set_current_dir("build")?;
+        if cfg!(windows) {
+            Command::new("Main.exe")
+                .status()
+                .unwrap_or_else(|err| panic!("{}", err));
+        } else {
+            Command::new("./Main")
+                .status()
+                .unwrap_or_else(|err| panic!("{}", err));
+        };
         Ok(())
     }
 

@@ -31,6 +31,12 @@ git clone https://github.com/Pavlos-Efstathiou/firework_lang
 cd firework_lang
 cargo build --release
 ```
+
+
+### 3. Installing GHC
+
+#### [Instructions](https://www.haskell.org/platform/)
+
 ## Quickstart
 
 ```sh
@@ -45,10 +51,10 @@ firework_lang run
 - [ ] Algebraic Data Types
 - [ ] An actually good transpiler
 - [ ] Custom Data Types
-- [ ] Build System
 - [ ] Dependency management
 - [ ] Infix and prefix functions
 - [ ] A Prelude written in Firework
 - [ ] Type inference
 - [ ] Operators
 - [ ] Better parsing error messages
+- [ ] Docs

@@ -1,4 +1,1 @@
-let id (a: b): b = a
-/* What's 9+10? 21 */
-let nine_plus_ten: Int = 21
-let main: IO() = print nine_plus_ten
+let main: IO() = putStrLn "Hello, World!"
