@@ -161,9 +161,8 @@ fn build_ast(pair: Pair<Rule>) -> AstNode {
                 stmt_false: Box::new(build_ast(inner_pair.next().unwrap())),
             }
         }
-        Rule::expr => build_ast(pair.into_inner().next().unwrap()),
+        Rule::repl => build_ast(pair.into_inner().next().unwrap()),
         Rule::EOI => Eoi,
-
         _ => unreachable!(),
     }
 }

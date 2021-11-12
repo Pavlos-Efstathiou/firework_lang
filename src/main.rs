@@ -2,6 +2,7 @@ use clap::{App, AppSettings, Arg, SubCommand};
 
 use firework_lang::firework_project::FireworkProject;
 use firework_lang::repl::Repl;
+use firework_lang::unrecoverable_error;
 
 fn main() {
     let clap_app = App::new("Firework")
@@ -18,14 +19,18 @@ fn main() {
     let project = FireworkProject::new();
 
     match matches.subcommand() {
-        ("run", _) => project.run().unwrap_or_else(|err| panic!("{}", err)),
+        ("run", _) => project
+            .run()
+            .unwrap_or_else(|err| unrecoverable_error!("{}", err)),
         ("new", Some(matches)) => {
             if let Some(project_name) = matches.value_of("project") {
                 project.new_project(project_name)
             }
         }
         ("repl", _) => Repl::new().repl_loop(),
-        ("build", _) => project.build().unwrap_or_else(|err| panic!("{}", err)),
+        ("build", _) => project
+            .build()
+            .unwrap_or_else(|err| unrecoverable_error!("{}", err)),
         _ => {}
     }
 }

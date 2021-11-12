@@ -1,15 +1,21 @@
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+use crate::error;
 use crate::{parser::ast::parse_repl, transpiler::transpile::Transpiler};
 
 pub struct Repl {}
+
+impl Drop for Repl {
+    fn drop(&mut self) {}
+}
 
 impl Default for Repl {
     fn default() -> Self {
         Repl::new()
     }
 }
+
 impl Repl {
     pub fn new() -> Self {
         Repl {}
@@ -46,9 +52,9 @@ impl Repl {
     fn eval(input: &str, transpiler: Transpiler) -> String {
         let parsed = parse_repl(input);
         parsed
-            .map(|ast| transpiler.transpile_ast(ast))
+            .map(|ast| transpiler.transpile_ast(ast).trim().to_string())
             .map_err(|err| {
-                println!("{}", err);
+                error!(err.to_string());
                 String::from("")
             })
             .unwrap_or_else(|_| String::from(""))

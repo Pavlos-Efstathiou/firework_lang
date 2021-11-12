@@ -5,7 +5,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io License](https://img.shields.io/crates/l/firework_lang)](https://crates.io/crates/firework_lang)
 
-Programming language with accidental OCaml inspired syntax™
+Programming language with accidental OCaml inspired syntax™ that transpiles to Haskell
 
 ## Build Guide
 
@@ -45,6 +45,14 @@ cd hello_world
 firework_lang run
 ```
 
+### 4. Running the example
+
+```sh
+git clone https://github.com/Pavlos-Efstathiou/firework_lang
+cd firework_lang/example
+firework_lang run
+```
+
 ## Upcoming features
 
 - [ ] Operators
@@ -53,8 +61,7 @@ firework_lang run
 - [ ] Custom Data Types
 - [ ] Dependency management
 - [ ] Infix and prefix functions
-- [ ] A Prelude written in Firework
+- [ ] A Prelude
 - [ ] Type inference
-- [ ] Operators
 - [ ] Better parsing error messages
 - [ ] Docs

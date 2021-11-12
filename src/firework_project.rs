@@ -1,9 +1,26 @@
 use indoc::formatdoc;
+use serde::Deserialize;
+use std::collections::HashMap;
 use std::process::Command;
 use std::{env, fs};
+use toml::de::Error;
 
 use crate::parser::ast::parse;
 use crate::transpiler::transpile::Transpiler;
+use crate::{info, todo_feature, unrecoverable_error};
+
+#[derive(Deserialize, Debug)]
+struct Config {
+    project: Project,
+    dependencies: HashMap<String, String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Project {
+    name: String,
+    version: String,
+    author: Option<String>,
+}
 
 pub struct FireworkProject {}
 
@@ -19,19 +36,27 @@ impl FireworkProject {
         Self {}
     }
 
+    fn parse_config(&self, _config_file_contents: &str) -> Result<Config, Error> {
+        todo_feature!("parsing TOML configs")
+    }
+
     pub fn new_project(&self, project_name: &str) {
         self.create_project(project_name)
-            .unwrap_or_else(|err| panic!("{}", err));
+            .unwrap_or_else(|err| unrecoverable_error!("{}", err));
     }
 
     pub fn build(&self) -> std::io::Result<()> {
-        let main = fs::read_to_string("src/main.firework")
-            .unwrap_or_else(|_| panic!("Couldn't read src/main.firework or project not found"));
+        let main = fs::read_to_string("src/main.firework").unwrap_or_else(|_| {
+            unrecoverable_error!("Couldn't read src/main.firework or project not found")
+        });
         let transpiler = Transpiler::default();
 
         fs::create_dir_all("build")?;
 
+        info!("Parsing");
         let parsed = parse(&main).unwrap();
+
+        info!("Building");
 
         fs::write(
             "build/Main.hs",
@@ -48,17 +73,20 @@ impl FireworkProject {
     }
 
     pub fn run(&self) -> std::io::Result<()> {
-        self.build().unwrap_or_else(|err| panic!("{}", err));
+        self.build()
+            .unwrap_or_else(|err| unrecoverable_error!("{}", err));
         env::set_current_dir("build")?;
+
         if cfg!(windows) {
             Command::new("Main.exe")
                 .status()
-                .unwrap_or_else(|err| panic!("{}", err));
+                .unwrap_or_else(|err| unrecoverable_error!("{}", err));
         } else {
             Command::new("./Main")
                 .status()
-                .unwrap_or_else(|err| panic!("{}", err));
+                .unwrap_or_else(|err| unrecoverable_error!("{}", err));
         };
+
         Ok(())
     }
 

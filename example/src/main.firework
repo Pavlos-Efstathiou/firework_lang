@@ -1,1 +1,9 @@
-let main: IO() = putStrLn "Hello, World!"
+/* Example of Firework's syntax :) */
+enum BaseTenNumbers = Zero | One | Two | Three | Four | Five | Six | Seven | Eight | Nine
+
+let id (a: b): b = a
+let if_statement: String = if true "True :]" else "Parsing Error!"
+let minus_one: Int = -1
+let replicate_a_lot_of_times: String = replicate 9999 'a'   
+
+let main: IO() = putStrLn replicate_a_lot_of_times

@@ -16,7 +16,7 @@ module_name = @{ (name_char | "::")+ }
 // Types 
 type_char = _{ name_char | ASCII_DIGIT }
 
-firework_type = @{ type_char+ ~ ("()")? }
+firework_type = @{ type_char+ ~ ("()")? } // Workaround
 
 type_signature = { COLON ~ firework_type }
 
@@ -32,7 +32,7 @@ enum_type = { "enum" ~ name ~ EQ ~ name ~ ("|" ~ name)+?}
 
 literal = { int | boolean | string | char | anon_fn }
 
-identifier = { name ~ expr+? }
+identifier = !{ name ~ expr+? }
 
 // Functions 
 fn_args = { (name ~ type_signature)+ }
@@ -50,10 +50,10 @@ module_declaration = { "module" ~ module_name }
 if_statement = { "if" ~ expr ~ expr ~ "else" ~ expr }
 
 // File
-expr = _{ literal | identifier | if_statement }
+expr = _{ ( if_statement | literal | identifier) }
 
 stmt = _{ (declaration | module_declaration | module_import | enum_type) }
 
-repl = _{ SOI ~ (stmt | expr ~ NEWLINE?)* ~ EOI }
+repl = !{ SOI ~ (stmt | expr ~ NEWLINE?)? ~ EOI }
 
-program = _{ SOI ~ (stmt ~ NEWLINE?)* ~ EOI }
+program = _{ SOI ~ ((stmt ~ NEWLINE?) | NEWLINE)* ~ EOI }

@@ -4,7 +4,63 @@ pub mod firework_project;
 pub mod parser;
 pub mod repl;
 pub mod transpiler;
-pub mod typechecker;
+
+#[macro_export]
+macro_rules! info {
+    ( $( $info:expr ),+ ) => {{
+        $(
+            println!("[INFO] {}", $info);
+        )*
+    }};
+
+    () => {};
+}
+
+#[macro_export]
+macro_rules! warn {
+    ( $( $warnings:expr ),+ ) => {{
+        use colored::Colorize;
+        $(
+            println!("{}", format!("[WARNING] {}", $warnings).yellow());
+        )*
+    }};
+
+    () => {};
+}
+#[macro_export]
+macro_rules! error {
+    ( $( $errors:expr ),+ ) => {{
+        use colored::Colorize;
+        $(
+            println!("{}", format!("[ERROR] {}", $errors).red());
+        )*
+    }};
+
+    () => {};
+}
+
+#[macro_export]
+macro_rules! unrecoverable_error {
+    ( $( $errors:expr ),+ ) => {{
+        use colored::Colorize;
+        $(
+            println!("{}", format!("[ERROR] {}", $errors).red());
+        )*
+        panic!();
+    }};
+
+    () => {};
+}
+
+#[macro_export]
+macro_rules! todo_feature {
+    ( $( $features:expr ),+ ) => {{
+        $(
+            crate::error!(format!("{} is not implemented yet!", $features));
+            panic!();
+        )*
+    }}
+}
 
 #[cfg(test)]
 mod tests {

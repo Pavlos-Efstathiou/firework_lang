@@ -2,8 +2,16 @@ use std::process::Command;
 
 use indoc::formatdoc;
 
-use crate::parser::ast::{AstNode, AST};
+use crate::{
+    info,
+    parser::ast::{AstNode, AST},
+    unrecoverable_error,
+};
 
+impl Drop for Transpiler {
+    fn drop(&mut self) {}
+}
+#[derive(Debug)]
 pub struct Transpiler {}
 
 impl Default for Transpiler {
@@ -31,7 +39,15 @@ impl Transpiler {
         match ast_node {
             AstNode::Str(x) => format!("{:?}", x),
             AstNode::Eoi => "".to_string(),
-            AstNode::Boolean(x) => x.to_string(),
+            AstNode::Boolean(x) => {
+                let to_string = x.to_string();
+                let mut chars = to_string.chars();
+
+                match chars.next() {
+                    None => String::new(),
+                    Some(f) => f.to_uppercase().collect::<String>() + chars.as_str(),
+                }
+            }
             AstNode::Char(x) => format!("{:?}", x),
             AstNode::Type(x) => x,
             AstNode::Int(x) => {
@@ -69,10 +85,10 @@ impl Transpiler {
 
                 formatdoc! {
                     "{name} :: {types} {return_type}
-                    {name} {arg_names}= {value}",
+                    {name} {arg_names} = {value}",
                     return_type = self.transpile_ast_node(*return_type),
                     value = self.transpile_ast_node(*value),
-                    types = if !types.is_empty() {types.join(" ") + " ->"} else {"".to_string()},
+                    types = if types.is_empty() {"".to_string()} else {types.join(" ") + " ->"},
                     arg_names = names.join(" "),
                     name = name,
                 }
@@ -102,21 +118,37 @@ impl Transpiler {
                     variants = variants.into_iter().map(|node| self.transpile_ast_node(node)).collect::<Vec<_>>().join("|"),
                 }
             }
+            AstNode::IfElse {
+                condition,
+                stmt_false,
+                stmt_true,
+            } => {
+                formatdoc!(
+                    "if {condition} then {stmt_true} else {stmt_false}",
+                    condition = self.transpile_ast_node(*condition),
+                    stmt_true = self.transpile_ast_node(*stmt_true),
+                    stmt_false = self.transpile_ast_node(*stmt_false)
+                )
+            }
             _ => todo!(),
         }
     }
 
     pub fn transpile_ast(&self, ast: AST) -> String {
+        info!("Transpiling");
         ast.iter()
             .cloned()
             .map(|node| self.transpile_ast_node(node) + "\n")
             .collect::<String>()
+            .trim()
+            .to_string()
     }
 
     pub fn compile(&self) {
+        info!("Running GHC");
         Command::new("ghc")
             .args(["build/Main.hs"])
             .status()
-            .unwrap_or_else(|err| panic!("{}", err));
+            .unwrap_or_else(|err| unrecoverable_error!("{}", err));
     }
 }

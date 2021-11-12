@@ -1,9 +1,9 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.2.2)
+[Latest Version](#v0.2.3)
 
-## v0.1.1
+# v0.1.1
 ### Changes
 - Added [rustyline](https://crates.io/crates/rustyline/) to dependencies
 - Added lexer REPL
@@ -13,13 +13,13 @@ All noteworth changes to this project will be mentioned in this file.
 - Added another test
 - Followed Clippy's sugestions
 
-## v0.1.2
+# v0.1.2
 ### Changes 
 - Added benches and configures tests properly
 - Made `Lexer::lex` more functional
 - Minor changes
 
-## v0.1.3
+# v0.1.3
 ### Changes
 - Switched to pest for parsing and lexing
 
@@ -65,3 +65,12 @@ All noteworth changes to this project will be mentioned in this file.
 - Renamed build_system to firework_project
 - Added more tests
 - Switched back to Rust 2018
+
+# v0.2.3
+### Changes
+- Added support for transpiling if statements, negative numbers and booleans
+- Added some macros for logging
+- Implemented the ```Drop``` trait for the ```Transpiler``` and ```Repl``` structs
+- Changed some rules in ```src/firework.pest```
+- Added ```colored``` and ```serde``` to this project's dependencies
+- Improved the example a bit

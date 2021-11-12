@@ -1,6 +1,6 @@
 [package]
 name = "firework_lang"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2018"
 authors = ["Pavlos-Efstathiou"]
 description = "Firework Programming Language"
@@ -16,3 +16,5 @@ clap = "2"
 indoc = "1"
 toml = "0.5"
 rustyline = "9"
+colored = "2"
+serde = { version = "1.0", features = ["derive"] }
