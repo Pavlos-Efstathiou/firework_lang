@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.2.3)
+[Latest Version](#v0.2.4)
 
 # v0.1.1
 ### Changes
@@ -74,3 +74,10 @@ All noteworth changes to this project will be mentioned in this file.
 - Changed some rules in ```src/firework.pest```
 - Added ```colored``` and ```serde``` to this project's dependencies
 - Improved the example a bit
+
+# v0.2.4
+### Changes
+- Replaced all occurrences of ```unrecoverable_error!("{}", err)``` with ```unrecoverable_error(err)```
+- Added the ```dump_ast`` subcommand which dumbs your codes AST as JSON to a file
+- Added ```serde_json``` to this project's dependencies
+- Added the ```dump_ast``` method to the ```FireworkProject```

@@ -3,10 +3,11 @@ use super::{FireworkParser, Rule};
 use pest::error::Error;
 use pest::iterators::Pair;
 use pest::Parser;
+use serde::{Deserialize, Serialize};
 
 pub type AST = Vec<AstNode>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AstNode {
     Str(String),
     Int(i64),

@@ -11,6 +11,7 @@ use crate::{
 impl Drop for Transpiler {
     fn drop(&mut self) {}
 }
+
 #[derive(Debug)]
 pub struct Transpiler {}
 
@@ -149,6 +150,6 @@ impl Transpiler {
         Command::new("ghc")
             .args(["build/Main.hs"])
             .status()
-            .unwrap_or_else(|err| unrecoverable_error!("{}", err));
+            .unwrap_or_else(|err| unrecoverable_error!(err));
     }
 }

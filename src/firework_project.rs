@@ -1,11 +1,11 @@
 use indoc::formatdoc;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::process::Command;
 use std::{env, fs};
 use toml::de::Error;
 
-use crate::parser::ast::parse;
+use crate::parser::ast::{parse, AST};
 use crate::transpiler::transpile::Transpiler;
 use crate::{info, todo_feature, unrecoverable_error};
 
@@ -20,6 +20,11 @@ struct Project {
     name: String,
     version: String,
     author: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+struct Program {
+    ast: AST,
 }
 
 pub struct FireworkProject {}
@@ -42,7 +47,7 @@ impl FireworkProject {
 
     pub fn new_project(&self, project_name: &str) {
         self.create_project(project_name)
-            .unwrap_or_else(|err| unrecoverable_error!("{}", err));
+            .unwrap_or_else(|err| unrecoverable_error!(err));
     }
 
     pub fn build(&self) -> std::io::Result<()> {
@@ -73,18 +78,17 @@ impl FireworkProject {
     }
 
     pub fn run(&self) -> std::io::Result<()> {
-        self.build()
-            .unwrap_or_else(|err| unrecoverable_error!("{}", err));
+        self.build().unwrap_or_else(|err| unrecoverable_error!(err));
         env::set_current_dir("build")?;
 
         if cfg!(windows) {
             Command::new("Main.exe")
                 .status()
-                .unwrap_or_else(|err| unrecoverable_error!("{}", err));
+                .unwrap_or_else(|err| unrecoverable_error!(err));
         } else {
             Command::new("./Main")
                 .status()
-                .unwrap_or_else(|err| unrecoverable_error!("{}", err));
+                .unwrap_or_else(|err| unrecoverable_error!(err));
         };
 
         Ok(())
@@ -113,6 +117,24 @@ impl FireworkProject {
             format!("{}/src/main.firework", project_name),
             "let main: IO() = putStrLn \"Hello, World!\"",
         )?;
+
+        Ok(())
+    }
+
+    pub fn dump_ast(&self) -> Result<(), Box<dyn std::error::Error>> {
+        let main = fs::read_to_string("src/main.firework").unwrap_or_else(|_| {
+            unrecoverable_error!("Couldn't read src/main.firework or project not found")
+        });
+
+        fs::write(
+            "build/ast.json",
+            serde_json::to_string_pretty(&Program {
+                ast: parse(&main).unwrap(),
+            })
+            .unwrap(),
+        )?;
+
+        info!("Writing AST to file");
 
         Ok(())
     }
