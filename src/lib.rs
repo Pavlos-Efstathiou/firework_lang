@@ -21,7 +21,7 @@ macro_rules! warn {
     ( $( $warnings:expr ),+ ) => {{
         use colored::Colorize;
         $(
-            println!("{}", format!("[WARNING] {}", $warnings).yellow());
+            println!("[{}] {}", "WARNING".yellow(), $warnings);
         )*
     }};
 
@@ -32,7 +32,7 @@ macro_rules! error {
     ( $( $errors:expr ),+ ) => {{
         use colored::Colorize;
         $(
-            println!("{}", format!("[ERROR] {}", $errors).red());
+            println!("[{}] {}", "ERROR".red(), $errors);
         )*
     }};
 
@@ -44,7 +44,7 @@ macro_rules! unrecoverable_error {
     ( $( $errors:expr ),+ ) => {{
         use colored::Colorize;
         $(
-            println!("{}", format!("[ERROR] {}", $errors).red());
+            println!("[{}] {}", "ERROR".red(), $errors);
         )*
         panic!();
     }};
@@ -56,8 +56,7 @@ macro_rules! unrecoverable_error {
 macro_rules! todo_feature {
     ( $( $features:expr ),+ ) => {{
         $(
-            crate::error!(format!("{} is not implemented yet!", $features));
-            panic!();
+            crate::unrecoverable_error!(format!("{} is not implemented yet!", $features));
         )*
     }}
 }

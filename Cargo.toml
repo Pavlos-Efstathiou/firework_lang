@@ -1,6 +1,6 @@
 [package]
 name = "firework_lang"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2018"
 authors = ["Pavlos-Efstathiou"]
 description = "Firework Programming Language"
@@ -19,3 +19,4 @@ rustyline = "9"
 colored = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+strsim = "0.10"

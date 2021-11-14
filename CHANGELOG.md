@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.2.4)
+[Latest Version](#v0.2.5)
 
 # v0.1.1
 ### Changes
@@ -81,3 +81,10 @@ All noteworth changes to this project will be mentioned in this file.
 - Added the ```dump_ast`` subcommand which dumbs your codes AST as JSON to a file
 - Added ```serde_json``` to this project's dependencies
 - Added the ```dump_ast``` method to the ```FireworkProject```
+
+# v0.2.5
+### Changes
+- Added suggesting subcommands when an unknown subcommand is supplied
+- In the logging macros only the logging levels are colored
+- ```FireworkProject::dump_ast``` creates the ```build/``` directory if it doesn't exist
+- Added ```strsim``` to this project's dependencies

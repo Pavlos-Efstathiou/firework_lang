@@ -126,6 +126,8 @@ impl FireworkProject {
             unrecoverable_error!("Couldn't read src/main.firework or project not found")
         });
 
+        fs::create_dir_all("build")?;
+
         fs::write(
             "build/ast.json",
             serde_json::to_string_pretty(&Program {
