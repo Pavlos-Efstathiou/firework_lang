@@ -24,6 +24,10 @@ Programming language with accidental OCaml inspired syntax™ that transpiles to
 ```sh
 cargo install firework_lang
 ```
+### 2b. Updating Firework
+```sh
+cargo install firework_lang --force
+```
 
 ### 2b. Building from Source
 ```sh
