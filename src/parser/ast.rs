@@ -23,7 +23,7 @@ pub enum AstNode {
         args: Vec<self::AstNode>,
     },
     Enum {
-        name: Box<self::AstNode>,
+        name: String,
         variants: Vec<self::AstNode>,
     },
     AnonFn {
@@ -83,7 +83,7 @@ fn build_ast(pair: Pair<Rule>) -> AstNode {
             let mut inner_pair = pair.into_inner();
 
             Enum {
-                name: Box::new(build_ast(inner_pair.next().unwrap())),
+                name: inner_pair.next().unwrap().to_string(),
                 variants: inner_pair.map(build_ast).collect::<Vec<_>>(),
             }
         }

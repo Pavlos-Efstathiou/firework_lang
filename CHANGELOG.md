@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.2.5)
+[Latest Version](#v0.2.6)
 
 # v0.1.1
 ### Changes
@@ -88,3 +88,8 @@ All noteworth changes to this project will be mentioned in this file.
 - In the logging macros only the logging levels are colored
 - ```FireworkProject::dump_ast``` creates the ```build/``` directory if it doesn't exist
 - Added ```strsim``` to this project's dependencies
+
+
+# v0.3.0
+### Changes
+- Removed the transpiler and added a compiler (Incomplete!) to LLVM IR and an interpreter

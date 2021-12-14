@@ -5,7 +5,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io License](https://img.shields.io/crates/l/firework_lang)](https://crates.io/crates/firework_lang)
 
-Programming language with accidental OCaml inspired syntax™ that transpiles to Haskell
+JIT interpreted programming language (Very incomplete!)
 
 ## Build Guide
 
@@ -37,9 +37,11 @@ cargo build --release
 ```
 
 
-### 3. Installing GHC
+### 3. Installing LLVM 12.x
 
-#### [Instructions](https://www.haskell.org/platform/)
+- [*nix](https://llvm.org/docs/CMake.html)
+	
+- [Windows Binaries](https://github.com/PLC-lang/llvm-package-windows/releases/tag/v12.0.1)
 
 ## Quickstart
 
@@ -61,11 +63,7 @@ firework_lang run
 
 - [ ] Operators
 - [ ] Algebraic Data Types
-- [ ] An actually good transpiler
 - [ ] Custom Data Types
 - [ ] Dependency management
-- [ ] Infix and prefix functions
-- [ ] A Prelude
-- [ ] Type inference
 - [ ] Better parsing error messages
 - [ ] Docs

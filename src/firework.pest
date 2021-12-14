@@ -13,10 +13,14 @@ name = @{ name_char+ }
 
 module_name = @{ (name_char | "::")+ }
 
+fn_name_char = _{ ("!" | "#" | "$" | "%" | "&" | "*" | "+" | "-" | "/" | "<" | ">" | "=" | "^" | "|" | "~" | "@" | "?" | "_") | (name_char | ASCII_DIGIT) }
+
+fn_name = @{ fn_name_char+ }
+
 // Types 
 type_char = _{ name_char | ASCII_DIGIT }
 
-firework_type = @{ type_char+ ~ ("()")? } // Workaround
+firework_type = @{ type_char+ }
 
 type_signature = { COLON ~ firework_type }
 
@@ -37,7 +41,7 @@ identifier = !{ name ~ expr+? }
 // Functions 
 fn_args = { (name ~ type_signature)+ }
 
-declaration = { "let" ~ name ~ (LPAREN ~ fn_args ~ RPAREN)? ~ type_signature ~ EQ ~ expr }
+declaration = { "let" ~ fn_name ~ (LPAREN ~ fn_args ~ RPAREN)? ~ type_signature ~ EQ ~ expr }
 
 anon_fn = { LPAREN ~ fn_args? ~ RPAREN ~ type_signature ~ ARROW ~ expr }
 
@@ -47,10 +51,10 @@ module_import = { "import" ~  module_name }
 module_declaration = { "module" ~ module_name }
 
 // If statements
-if_statement = { "if" ~ expr ~ expr ~ "else" ~ expr }
+if_statement = { "if" ~ expr ~ "else" ~ expr }
 
 // File
-expr = _{ ( if_statement | literal | identifier) }
+expr = _{ (if_statement | literal | identifier) }
 
 stmt = _{ (declaration | module_declaration | module_import | enum_type) }
 

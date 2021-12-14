@@ -1,13 +1,11 @@
-use indoc::formatdoc;
+use inkwell::support::LLVMString;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::process::Command;
-use std::{env, fs};
-use toml::de::Error;
+use std::fs;
 
+use crate::codegen::CodeGen;
 use crate::parser::ast::{parse, AST};
-use crate::transpiler::transpile::Transpiler;
-use crate::{info, todo_feature, unrecoverable_error};
+use crate::{info, unrecoverable_error};
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -27,22 +25,14 @@ struct Program {
     ast: AST,
 }
 
-pub struct FireworkProject {}
-
-impl Default for FireworkProject {
-    fn default() -> Self {
-        Self::new()
-    }
+pub struct FireworkProject<'ctx> {
+    compiler: CodeGen<'ctx>,
 }
 
 #[allow(dead_code)]
-impl FireworkProject {
-    pub fn new() -> Self {
-        Self {}
-    }
-
-    fn parse_config(&self, _config_file_contents: &str) -> Result<Config, Error> {
-        todo_feature!("parsing TOML configs")
+impl<'ctx> FireworkProject<'ctx> {
+    pub fn new(compiler: CodeGen<'ctx>) -> Self {
+        Self { compiler }
     }
 
     pub fn new_project(&self, project_name: &str) {
@@ -50,72 +40,38 @@ impl FireworkProject {
             .unwrap_or_else(|err| unrecoverable_error!(err));
     }
 
-    pub fn build(&self) -> std::io::Result<()> {
+    pub fn compile(&self) -> std::io::Result<()> {
         let main = fs::read_to_string("src/main.firework").unwrap_or_else(|_| {
             unrecoverable_error!("Couldn't read src/main.firework or project not found")
         });
-        let transpiler = Transpiler::default();
-
-        fs::create_dir_all("build")?;
 
         info!("Parsing");
+
         let parsed = parse(&main).unwrap();
 
-        info!("Building");
+        info!("Interpreting");
 
-        fs::write(
-            "build/Main.hs",
-            formatdoc! {
-                "module Main where
-
-                {transpiled}", 
-                transpiled = transpiler.transpile_ast(parsed)
-            },
-        )?;
-        transpiler.compile();
+        self.compiler.compile(parsed);
 
         Ok(())
     }
 
-    pub fn run(&self) -> std::io::Result<()> {
-        self.build().unwrap_or_else(|err| unrecoverable_error!(err));
-        env::set_current_dir("build")?;
-
-        if cfg!(windows) {
-            Command::new("Main.exe")
-                .status()
-                .unwrap_or_else(|err| unrecoverable_error!(err));
-        } else {
-            Command::new("./Main")
-                .status()
-                .unwrap_or_else(|err| unrecoverable_error!(err));
+    pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
+        self.compile()?;
+        unsafe {
+            self.compiler.call_main();
         };
-
         Ok(())
     }
 
     fn create_project(&self, project_name: &str) -> std::io::Result<()> {
         fs::create_dir_all(project_name)?;
 
-        fs::write(
-            format!("{}/config.toml", project_name),
-            formatdoc! {
-                "[project]
-                name = \"{project_name}\"
-                version = \"{version_number}\"
-
-                [dependencies]
-                ",
-                project_name = project_name,
-                version_number = "0.1.0"
-            },
-        )?;
-
-        fs::write(format!("{}/.gitignore", project_name), "/build")?;
+        fs::write(format!("{}/.gitignore", project_name), "ast.json\nir.ll")?;
         fs::create_dir_all(format!("{}/src", project_name))?;
         fs::write(
             format!("{}/src/main.firework", project_name),
-            "let main: IO() = putStrLn \"Hello, World!\"",
+            "let main: i64 = 0",
         )?;
 
         Ok(())
@@ -126,10 +82,8 @@ impl FireworkProject {
             unrecoverable_error!("Couldn't read src/main.firework or project not found")
         });
 
-        fs::create_dir_all("build")?;
-
         fs::write(
-            "build/ast.json",
+            "ast.json",
             serde_json::to_string_pretty(&Program {
                 ast: parse(&main).unwrap(),
             })
@@ -139,5 +93,10 @@ impl FireworkProject {
         info!("Writing AST to file");
 
         Ok(())
+    }
+
+    pub fn dump_ir(&self) -> Result<(), LLVMString> {
+        self.compile().unwrap();
+        self.compiler.dump_ir()
     }
 }
