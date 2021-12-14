@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.2.6)
+[Latest Version](#v0.3.0)
 
 # v0.1.1
 ### Changes

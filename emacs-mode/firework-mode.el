@@ -22,7 +22,7 @@
       (let* (
              (x-keywords '("let" "import" "module" "enum" "if" "else"))
              ;; TODO Haskell types and functions
-             (x-types '("Int" "Integer" "String" "Char" "IO" "Bool"))
+             (x-types '("i64" "bool" "str" "char"))
              (x-comments '("/*" "*/"))
 
              (x-comments-regexp (regexp-opt x-comments 'comment))
