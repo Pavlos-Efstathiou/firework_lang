@@ -5,33 +5,11 @@ pub mod firework_project;
 pub mod parser;
 
 #[macro_export]
-macro_rules! info {
-    ( $( $info:expr ),+ ) => {{
-        $(
-            println!("[INFO] {}", $info);
-        )*
-    }};
-
-    () => {};
-}
-
-#[macro_export]
-macro_rules! warn {
-    ( $( $warnings:expr ),+ ) => {{
-        use colored::Colorize;
-        $(
-            println!("[{}] {}", "WARNING".yellow(), $warnings);
-        )*
-    }};
-
-    () => {};
-}
-#[macro_export]
 macro_rules! error {
     ( $( $errors:expr ),+ ) => {{
         use colored::Colorize;
         $(
-            println!("[{}] {}", "ERROR".red(), $errors);
+            println!("{}: {}", "error".red(), $errors.white());
         )*
     }};
 
@@ -43,7 +21,7 @@ macro_rules! unrecoverable_error {
     ( $( $errors:expr ),+ ) => {{
         use colored::Colorize;
         $(
-            println!("[{}] {}", "ERROR".red(), $errors);
+            println!("{}: {}", "error".red().bold(), $errors.white());
         )*
         panic!();
     }};

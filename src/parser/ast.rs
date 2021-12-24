@@ -3,16 +3,16 @@ use super::{FireworkParser, Rule};
 use pest::error::Error;
 use pest::iterators::Pair;
 use pest::Parser;
-use serde::{Deserialize, Serialize};
 
 pub type AST = Vec<AstNode>;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub enum AstNode {
     Str(String),
     Int(i64),
     Char(char),
     Boolean(bool),
+    InParens(Box<AstNode>),
     Type(String),
     FnArgs(Vec<(self::AstNode, self::AstNode)>),
     ModuleImport(Box<self::AstNode>),
@@ -163,6 +163,7 @@ fn build_ast(pair: Pair<Rule>) -> AstNode {
             }
         }
         Rule::repl => build_ast(pair.into_inner().next().unwrap()),
+        Rule::precedence => InParens(Box::new(build_ast(pair.into_inner().next().unwrap()))),
         Rule::EOI => Eoi,
         _ => unreachable!(),
     }

@@ -1,3 +1,5 @@
+extern crate inkwell_llvm12 as inkwell;
+
 use clap::{App, AppSettings, Arg, SubCommand};
 
 use firework_lang::codegen::CodeGen;
@@ -8,7 +10,7 @@ use inkwell::OptimizationLevel;
 use std::error::Error;
 use strsim::damerau_levenshtein;
 
-const SUBCOMMANDS: [&str; 5] = ["new", "build", "dump_ast", "dump_ir", "repl"];
+const SUBCOMMANDS: [&str; 5] = ["new", "build", "dump_ir", "dump_ast", "repl"];
 
 fn main() -> Result<(), Box<dyn Error>> {
     let clap_app = App::new("Firework")
@@ -19,10 +21,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .subcommand(SubCommand::with_name("new").arg(Arg::with_name("project").takes_value(true)))
         .subcommand(SubCommand::with_name("run").help("Runs a firework project"))
-        .subcommand(
-            SubCommand::with_name("dump_ast").help("Dumps the AST of your code as JSON to a file"),
-        )
         .subcommand(SubCommand::with_name("dump_ir").help("Dumps LLVM's output to ir.ll"))
+        .subcommand(SubCommand::with_name("dump_asm").help("Dumps LLVM's assembly output to ir.ll"))
         .subcommand(SubCommand::with_name("repl").help("Runs the firework repl"));
 
     let matches = clap_app.get_matches();
@@ -44,8 +44,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
         ("run", _) => project.run()?,
-        ("dump_ast", _) => project.dump_ast()?,
         ("dump_ir", _) => project.dump_ir()?,
+        ("dump_asm", _) => project.dump_asm()?,
         ("repl", _) => todo_feature!("The REPL"),
         (other, _) => {
             if !other.chars().map(|c| c.is_numeric()).all(|x| x) {

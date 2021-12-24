@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.3.0)
+[Latest Version](#v0.3.1)
 
 # v0.1.1
 ### Changes
@@ -93,3 +93,15 @@ All noteworth changes to this project will be mentioned in this file.
 # v0.3.0
 ### Changes
 - Removed the transpiler and added a compiler (Incomplete!) to LLVM IR and an interpreter
+
+# v0.3.1
+### Changes
+- Added expressions in parenthenses
+- Added better parsing error messages
+- Added dumping assembly of code
+- Changed the logging macros just a bit
+- Added compiling if statements
+- Changed strings and chars from vectors to ```i8``` pointers
+- Added the ```==```, ```+```, ```-```, ```*``` and ```/``` functions
+- Removed the ```warn``` and ```info``` macros
+- Removed dumping the AST of code

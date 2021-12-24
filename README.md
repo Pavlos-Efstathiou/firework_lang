@@ -1,11 +1,12 @@
 ## Firework programming language
 
 [![Test Status](https://github.com/Pavlos-Efstathiou/firework_lang/workflows/Rust/badge.svg?event=push)](https://github.com/Pavlos-Efstathiou/firework_lang/actions)
+![Lines of Code](https://tokei.rs/b1/github/Pavlos-Efstathiou/firework_lang)](https://github.com/Aaronepower/tokei)
 [![Crates.io Version](https://img.shields.io/crates/v/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io Downloads](https://img.shields.io/crates/d/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io License](https://img.shields.io/crates/l/firework_lang)](https://crates.io/crates/firework_lang)
 
-JIT interpreted programming language (Very incomplete!)
+Pure functional programming language that compiles to [LLVM IR](https://llvm.org/docs/LangRef.html) (Very incomplete, be warned)
 
 ## Build Guide
 
@@ -17,7 +18,6 @@ JIT interpreted programming language (Very incomplete!)
 	```
 	
 - Windows:
-	
 	Install [rustup-init](https://static.rust-lang.org/rustup/dist/i686-pc-windows-gnu/rustup-init.exe) and run it
   
 ### 2a. Installing Firework
@@ -61,9 +61,7 @@ firework_lang run
 
 ## Upcoming features
 
-- [ ] Operators
 - [ ] Algebraic Data Types
 - [ ] Custom Data Types
 - [ ] Dependency management
-- [ ] Better parsing error messages
 - [ ] Docs

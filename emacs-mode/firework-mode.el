@@ -21,7 +21,6 @@
 (setq firework-font-lock-keywords
       (let* (
              (x-keywords '("let" "import" "module" "enum" "if" "else"))
-             ;; TODO Haskell types and functions
              (x-types '("i64" "bool" "str" "char"))
              (x-comments '("/*" "*/"))
 

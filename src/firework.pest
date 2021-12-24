@@ -13,7 +13,7 @@ name = @{ name_char+ }
 
 module_name = @{ (name_char | "::")+ }
 
-fn_name_char = _{ ("!" | "#" | "$" | "%" | "&" | "*" | "+" | "-" | "/" | "<" | ">" | "=" | "^" | "|" | "~" | "@" | "?" | "_") | (name_char | ASCII_DIGIT) }
+fn_name_char = _{ "!" | "#" | "$" | "%" | "&" | "*" | "+" | "-" | "/" | "<" | ">" | "=" | "^" | "|" | "~" | "@" | "?" | "_" | name_char  }
 
 fn_name = @{ fn_name_char+ }
 
@@ -34,9 +34,12 @@ char = @{ "'" ~ (!"'" ~ ANY)? ~ "'" }
 
 enum_type = { "enum" ~ name ~ EQ ~ name ~ ("|" ~ name)+?}
 
-literal = { int | boolean | string | char | anon_fn }
 
-identifier = !{ name ~ expr+? }
+literal = { precedence | int | boolean | string | char | anon_fn }
+
+identifier = !{ fn_name ~ expr+? }
+
+precedence = { LPAREN ~ expr ~ RPAREN }
 
 // Functions 
 fn_args = { (name ~ type_signature)+ }
@@ -51,10 +54,10 @@ module_import = { "import" ~  module_name }
 module_declaration = { "module" ~ module_name }
 
 // If statements
-if_statement = { "if" ~ expr ~ "else" ~ expr }
+if_statement = { "if" ~ expr ~ "do" ~ expr ~ "else" ~ expr }
 
 // File
-expr = _{ (if_statement | literal | identifier) }
+expr = _{ (precedence | if_statement | literal | identifier) }
 
 stmt = _{ (declaration | module_declaration | module_import | enum_type) }
 

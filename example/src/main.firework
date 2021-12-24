@@ -1,1 +1,1 @@
-let main: i64 = printf "Hello World!"
+let main: i64 = printf "Hello, World!"
