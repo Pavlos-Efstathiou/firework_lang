@@ -84,7 +84,7 @@ impl<'ctx> FireworkProject<'ctx> {
         fs::create_dir_all(format!("{}/src", project_name))?;
         fs::write(
             format!("{}/src/main.firework", project_name),
-            "let main: i64 = printf \"Hello World!\n\"",
+            "let main: i64 = printf \"Hello World!\"",
         )?;
 
         Ok(())

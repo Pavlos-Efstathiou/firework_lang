@@ -1,7 +1,7 @@
 ## Firework programming language
 
 [![Test Status](https://github.com/Pavlos-Efstathiou/firework_lang/workflows/Rust/badge.svg?event=push)](https://github.com/Pavlos-Efstathiou/firework_lang/actions)
-![Lines of Code](https://tokei.rs/b1/github/Pavlos-Efstathiou/firework_lang)](https://github.com/Aaronepower/tokei)
+![Lines of Code](https://tokei.rs/b1/github/Pavlos-Efstathiou/firework_lang)
 [![Crates.io Version](https://img.shields.io/crates/v/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io Downloads](https://img.shields.io/crates/d/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io License](https://img.shields.io/crates/l/firework_lang)](https://crates.io/crates/firework_lang)
@@ -40,7 +40,6 @@ cargo build --release
 ### 3. Installing LLVM 12.x
 
 - [*nix](https://llvm.org/docs/CMake.html)
-	
 - [Windows Binaries](https://github.com/PLC-lang/llvm-package-windows/releases/tag/v12.0.1)
 
 ## Quickstart
