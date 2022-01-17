@@ -1,1 +1,3 @@
-let main: i64 = printf "Hello, World!"
+let bool_to_string (a: bool): str = if bool_eq(a, true) do "true" else "false"
+let one_eq_two: bool = ==(1, 2)
+let main: i64 = printf("%s", bool_to_string(one_eq_two))

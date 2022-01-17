@@ -1,6 +1,6 @@
 [package]
 name = "firework_lang"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2018"
 authors = ["Pavlos-Efstathiou"]
 description = "Firework Programming Language"

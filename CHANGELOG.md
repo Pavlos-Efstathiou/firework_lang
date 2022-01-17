@@ -105,3 +105,8 @@ All noteworth changes to this project will be mentioned in this file.
 - Added the ```==```, ```+```, ```-```, ```*``` and ```/``` functions
 - Removed the ```warn``` and ```info``` macros
 - Removed dumping the AST of code
+
+# v0.3.2
+### Changes
+- Changed the file structure of the project
+- Made so many changes

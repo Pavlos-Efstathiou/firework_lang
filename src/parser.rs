@@ -1,17 +1,24 @@
+//! Parser
+#[derive(Parser)]
+#[grammar = "firework.pest"]
+pub(crate) struct FireworkParser;
+
 use self::AstNode::*;
-use super::{FireworkParser, Rule};
 use pest::error::Error;
 use pest::iterators::Pair;
 use pest::Parser;
 
+/// Represents a Firework program's Abstract Syntax Tree
 pub type AST = Vec<AstNode>;
 
-#[derive(Debug, Clone)]
+/// Represents an Abstract Syntax Tree's node
+#[derive(Debug, Clone, PartialEq)]
 pub enum AstNode {
     Str(String),
     Int(i64),
     Char(char),
     Boolean(bool),
+    List(Vec<AstNode>),
     InParens(Box<AstNode>),
     Type(String),
     FnArgs(Vec<(self::AstNode, self::AstNode)>),
@@ -45,6 +52,7 @@ pub enum AstNode {
     Eoi,
 }
 
+/// Parses a Firework program and transforms pest's output to a custom AST
 pub fn parse(input: &str) -> Result<AST, Error<Rule>> {
     Ok(FireworkParser::parse(Rule::program, input)?
         .into_iter()
@@ -52,13 +60,7 @@ pub fn parse(input: &str) -> Result<AST, Error<Rule>> {
         .collect::<AST>())
 }
 
-pub fn parse_repl(input: &str) -> Result<AST, Error<Rule>> {
-    Ok(FireworkParser::parse(Rule::repl, input)?
-        .into_iter()
-        .map(build_ast)
-        .collect::<AST>())
-}
-
+/// Builds a custom AST from pest's output
 fn build_ast(pair: Pair<Rule>) -> AstNode {
     match pair.as_rule() {
         Rule::name => Identifier {
@@ -164,6 +166,9 @@ fn build_ast(pair: Pair<Rule>) -> AstNode {
         }
         Rule::repl => build_ast(pair.into_inner().next().unwrap()),
         Rule::precedence => InParens(Box::new(build_ast(pair.into_inner().next().unwrap()))),
+        Rule::list => {
+            todo!()
+        }
         Rule::EOI => Eoi,
         _ => unreachable!(),
     }

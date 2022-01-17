@@ -60,7 +60,10 @@ firework_lang run
 
 ## Upcoming features
 
-- [ ] Algebraic Data Types
-- [ ] Custom Data Types
-- [ ] Dependency management
-- [ ] Docs
+[ ] Algebraic Data Types
+
+[ ] Custom Data Types
+
+[ ] Dependency management
+
+[ ] REPL

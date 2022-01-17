@@ -4,8 +4,11 @@ COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" ~ NEWLINE? }
 ARROW = _{ "->" }
 LPAREN = _{ "(" }
 RPAREN = _{ ")" }
+LSQUARE = _{ "[" }
+RSQUARE = _{ "]" }
 COLON = _{ ":" }
 EQ = _{ "=" }
+COMMA = _{ "," }
 
 name_char = _{ ASCII_ALPHA | "_" }
 
@@ -32,12 +35,13 @@ string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
 
 char = @{ "'" ~ (!"'" ~ ANY)? ~ "'" }
 
-enum_type = { "enum" ~ name ~ EQ ~ name ~ ("|" ~ name)+?}
+list = @{ LSQUARE ~ literal ~ ( COMMA ~ literal )+? ~ RSQUARE }
 
+enum_type = @{ "enum" ~ name ~ EQ ~ name ~ ("|" ~ name)+?}
 
-literal = { precedence | int | boolean | string | char | anon_fn }
+literal = { precedence | int | boolean | string | char | list | anon_fn }
 
-identifier = !{ fn_name ~ expr+? }
+identifier = { fn_name ~ LPAREN ~  expr ~ (COMMA ~ expr)+? ~ RPAREN | fn_name }
 
 precedence = { LPAREN ~ expr ~ RPAREN }
 

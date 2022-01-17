@@ -1,7 +1,11 @@
+//! Compiler
 extern crate inkwell_llvm12 as inkwell;
 
-use crate::parser::ast::{AstNode, AST};
+use std::borrow::Borrow;
+
+use crate::parser::{AstNode, AST};
 use crate::{todo_feature, unrecoverable_error};
+use inkwell::attributes::AttributeLoc;
 use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::execution_engine::ExecutionEngine;
@@ -14,11 +18,24 @@ use inkwell::types::{BasicMetadataTypeEnum, StringRadix};
 use inkwell::values::{AnyValueEnum, BasicMetadataValueEnum, BasicValueEnum, FunctionValue};
 use inkwell::{AddressSpace, IntPredicate, OptimizationLevel};
 
+macro_rules! any_value_enum_to_basic_value_enum {
+    ( $x:expr ) => {
+        match $x {
+            AnyValueEnum::IntValue(x) => BasicValueEnum::IntValue(x),
+            AnyValueEnum::PointerValue(x) => BasicValueEnum::PointerValue(x),
+            a => todo_feature!(format!("Type `{:?}` not implemented or doesn't exist", a)),
+        }
+    };
+
+    () => {};
+}
+
 pub struct CodeGen<'ctx> {
     context: &'ctx Context,
     module: Module<'ctx>,
     builder: Builder<'ctx>,
     execution_engine: ExecutionEngine<'ctx>,
+    core: Module<'ctx>,
 }
 
 impl<'ctx> CodeGen<'ctx> {
@@ -33,26 +50,29 @@ impl<'ctx> CodeGen<'ctx> {
         builder: Builder<'ctx>,
         execution_engine: ExecutionEngine<'ctx>,
     ) -> Self {
+        let core = context.create_module("core");
+
         CodeGen {
             context,
             module,
             builder,
             execution_engine,
+            core,
         }
     }
 
-    fn available_global_name(&self, name: u8) -> String {
+    fn available_name(&self, name: u8) -> String {
         let name_as_string = name.to_string();
 
         if self.module.get_global(&name_as_string).is_some() {
-            self.available_global_name(name + 1)
+            self.available_name(name + 1)
         } else {
             name_as_string
         }
     }
 
     fn compile_astnode(&self, node: AstNode) -> Result<AnyValueEnum<'ctx>, &'static str> {
-        // TODO: anonymous functions, function arguments, module imports and declarations, enums and unescaping strings
+        // TODO: anonymous functions, module imports and declarations, enums and unescaping strings
         match node {
             AstNode::Int(int) => Ok(self
                 .context
@@ -62,7 +82,7 @@ impl<'ctx> CodeGen<'ctx> {
                 .into()),
             AstNode::Str(str) => Ok(unsafe {
                 self.builder
-                    .build_global_string(&(str + "\0"), &self.available_global_name(0))
+                    .build_global_string(&(str + "\0"), &self.available_name(0))
                     .as_pointer_value()
                     .into()
             }),
@@ -73,7 +93,7 @@ impl<'ctx> CodeGen<'ctx> {
                 .into()),
             AstNode::Char(char) => Ok(unsafe {
                 self.builder
-                    .build_global_string(&(char.to_string() + "\0"), &self.available_global_name(0))
+                    .build_global_string(&(char.to_string() + "\0"), &self.available_name(0))
                     .as_pointer_value()
                     .into()
             }),
@@ -108,6 +128,8 @@ impl<'ctx> CodeGen<'ctx> {
                     "ifcond",
                 );
 
+                let else_branch = self.compile_astnode(*stmt_false).unwrap();
+
                 let last_function = self.module.get_last_function().unwrap();
 
                 let then_bb = self.context.append_basic_block(last_function, "then");
@@ -132,22 +154,8 @@ impl<'ctx> CodeGen<'ctx> {
                 let phi = self.builder.build_phi(self.context.i64_type(), "iftmp");
 
                 phi.add_incoming(&[
-                    (
-                        &match value {
-                            AnyValueEnum::IntValue(x) => BasicValueEnum::IntValue(x),
-                            AnyValueEnum::PointerValue(x) => BasicValueEnum::PointerValue(x),
-                            _ => unreachable!(),
-                        },
-                        then_bb,
-                    ),
-                    (
-                        &match self.compile_astnode(*stmt_false).unwrap() {
-                            AnyValueEnum::IntValue(x) => BasicValueEnum::IntValue(x),
-                            AnyValueEnum::PointerValue(x) => BasicValueEnum::PointerValue(x),
-                            _ => unreachable!(),
-                        },
-                        else_bb,
-                    ),
+                    (&any_value_enum_to_basic_value_enum!(value), then_bb),
+                    (&any_value_enum_to_basic_value_enum!(else_branch), else_bb),
                 ]);
 
                 Ok(phi.as_basic_value().into())
@@ -164,27 +172,60 @@ impl<'ctx> CodeGen<'ctx> {
                             AnyValueEnum::PointerValue(x) => {
                                 BasicMetadataValueEnum::PointerValue(x)
                             }
-                            _ => unreachable!(),
+                            a => {
+                                todo_feature!(format!("Compiling {:?}", a))
+                            }
                         }
                     })
                     .collect::<Vec<_>>();
 
-                let ret_val = self
-                    .builder
-                    .build_call(
+                let last_function = self.module.get_last_function().unwrap();
+                let attr = last_function.get_string_attribute(AttributeLoc::Return, &name);
+
+                Ok(if let Some(arg) = attr {
+                    last_function
+                        .get_nth_param(
+                            arg.get_string_value()
+                                .to_str()
+                                .unwrap()
+                                .parse::<u32>()
+                                .unwrap(),
+                        )
+                        .unwrap()
+                        .into()
+                } else {
+                    let called = self.builder.build_call(
                         self.get_function(&name).unwrap_or_else(|| {
                             unrecoverable_error!(format!("Function {} not found!", name))
                         }),
                         arg_values.as_slice(),
                         &name,
-                    )
-                    .try_as_basic_value()
-                    .left()
-                    .unwrap();
-
-                Ok(ret_val.into())
+                    );
+                    called.set_tail_call(true);
+                    called.try_as_basic_value().left().unwrap().into()
+                })
             }
-            _ => todo!(),
+            AstNode::InParens(node) => {
+                let compiled_astnode = self.compile_astnode(*node).unwrap();
+
+                let alloca = self.builder.build_alloca(
+                    any_value_enum_to_basic_value_enum!(compiled_astnode).get_type(),
+                    "inparens",
+                );
+
+                self.builder.build_store(
+                    alloca,
+                    any_value_enum_to_basic_value_enum!(compiled_astnode),
+                );
+
+                Ok(self
+                    .builder
+                    .build_load(alloca, alloca.get_name().to_string_lossy().borrow())
+                    .into())
+            }
+            a => {
+                todo_feature!(format!("Compiling {:?}", a))
+            }
         }
     }
 
@@ -226,17 +267,26 @@ impl<'ctx> CodeGen<'ctx> {
 
                 self.builder.position_at_end(basic_block);
 
-                let basic_value = match self.compile_astnode(*value).unwrap() {
-                    AnyValueEnum::IntValue(x) => BasicValueEnum::IntValue(x),
-                    AnyValueEnum::PointerValue(x) => BasicValueEnum::PointerValue(x),
-                    a => {
-                        todo_feature!(format!("Value {:#?}", a))
-                    }
-                };
+                let params = function.get_params();
+
+                for arg in &params {
+                    let index = params.iter().position(|curr_arg| arg == curr_arg).unwrap();
+                    let name = match &args_vec[index].0 {
+                        AstNode::Identifier { name, args: _ } => name,
+                        _ => unreachable!(),
+                    };
+                    let attr = self
+                        .context
+                        .create_string_attribute(name, &index.to_string());
+                    function.add_attribute(AttributeLoc::Return, attr)
+                }
+
+                let basic_value =
+                    any_value_enum_to_basic_value_enum!(self.compile_astnode(*value).unwrap());
 
                 self.builder.build_return(Some(&basic_value));
 
-                self.get_function(&name).unwrap()
+                function
             }
             _ => panic!("Not a function!"),
         }
@@ -244,8 +294,20 @@ impl<'ctx> CodeGen<'ctx> {
 
     fn add_default_functions(&self) {
         let i64_type = self.context.i64_type();
+        let bool_type = self.context.bool_type();
 
-        // TODO: Find a way to import the following functions or add them to another module
+        // Puts
+        let func_type = i64_type.fn_type(
+            &[self
+                .context
+                .i8_type()
+                .ptr_type(AddressSpace::Generic)
+                .into()],
+            false,
+        );
+
+        self.module
+            .add_function("puts", func_type, Some(Linkage::External));
 
         // Printf
         let func_type = i64_type.fn_type(
@@ -265,7 +327,7 @@ impl<'ctx> CodeGen<'ctx> {
             .context
             .bool_type()
             .fn_type(&[i64_type.into(), i64_type.into()], false);
-        let func = self.module.add_function("==", func_type, None);
+        let func = self.core.add_function("==", func_type, None);
 
         self.builder
             .position_at_end(self.context.append_basic_block(func, "entry"));
@@ -281,6 +343,25 @@ impl<'ctx> CodeGen<'ctx> {
                 "eq",
             )));
 
+        let func_type = self
+            .context
+            .bool_type()
+            .fn_type(&[bool_type.into(), bool_type.into()], false);
+        let func = self.core.add_function("bool_eq", func_type, None);
+
+        self.builder
+            .position_at_end(self.context.append_basic_block(func, "entry"));
+
+        let lhs = func.get_nth_param(0).unwrap().into_int_value();
+        let rhs = func.get_nth_param(1).unwrap().into_int_value();
+
+        self.builder
+            .build_return(Some(&self.builder.build_int_compare(
+                inkwell::IntPredicate::EQ,
+                lhs,
+                rhs,
+                "eq",
+            )));
         // +
 
         let func_type = self
@@ -288,7 +369,7 @@ impl<'ctx> CodeGen<'ctx> {
             .i64_type()
             .fn_type(&[i64_type.into(), i64_type.into()], false);
 
-        let func = self.module.add_function("+", func_type, None);
+        let func = self.core.add_function("+", func_type, None);
 
         self.builder
             .position_at_end(self.context.append_basic_block(func, "entry"));
@@ -306,7 +387,7 @@ impl<'ctx> CodeGen<'ctx> {
             .i64_type()
             .fn_type(&[i64_type.into(), i64_type.into()], false);
 
-        let func = self.module.add_function("-", func_type, None);
+        let func = self.core.add_function("-", func_type, None);
 
         self.builder
             .position_at_end(self.context.append_basic_block(func, "entry"));
@@ -324,7 +405,7 @@ impl<'ctx> CodeGen<'ctx> {
             .i64_type()
             .fn_type(&[i64_type.into(), i64_type.into()], false);
 
-        let func = self.module.add_function("*", func_type, None);
+        let func = self.core.add_function("*", func_type, None);
 
         self.builder
             .position_at_end(self.context.append_basic_block(func, "entry"));
@@ -342,7 +423,7 @@ impl<'ctx> CodeGen<'ctx> {
             .i64_type()
             .fn_type(&[i64_type.into(), i64_type.into()], false);
 
-        let func = self.module.add_function("/", func_type, None);
+        let func = self.core.add_function("/", func_type, None);
 
         self.builder
             .position_at_end(self.context.append_basic_block(func, "entry"));
@@ -352,6 +433,8 @@ impl<'ctx> CodeGen<'ctx> {
 
         self.builder
             .build_return(Some(&self.builder.build_int_signed_div(lhs, rhs, "div")));
+
+        self.module.link_in_module(self.core.clone()).unwrap();
     }
 
     fn compile_type(&self, node_type: AstNode) -> BasicMetadataTypeEnum<'ctx> {
