@@ -110,3 +110,6 @@ All noteworth changes to this project will be mentioned in this file.
 ### Changes
 - Changed the file structure of the project
 - Made so many changes
+
+# v0.3.3
+- Fixed broken formatting in README.MD
