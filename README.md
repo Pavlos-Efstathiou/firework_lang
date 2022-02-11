@@ -5,8 +5,9 @@
 [![Crates.io Version](https://img.shields.io/crates/v/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io Downloads](https://img.shields.io/crates/d/firework_lang)](https://crates.io/crates/firework_lang)
 [![Crates.io License](https://img.shields.io/crates/l/firework_lang)](https://crates.io/crates/firework_lang)
+[![Minimum rustc version](https://img.shields.io/badge/rustc-1.46.0+-blue.svg)](https://blog.rust-lang.org/2020/08/27/Rust-1.46.0.html)
 
-Pure functional programming language that compiles to [LLVM IR](https://llvm.org/docs/LangRef.html) (Very incomplete, be warned)
+Functional programming language that compiles to [LLVM IR](https://llvm.org/docs/LangRef.html) (Very incomplete, be warned)
 
 ## Build Guide
 

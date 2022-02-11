@@ -2,8 +2,10 @@
 extern crate inkwell_llvm12 as inkwell;
 
 use std::borrow::Borrow;
+use std::fs::{self};
 
-use crate::parser::{AstNode, AST};
+use crate::core::{get_core_path, install_core, is_core_installed};
+use crate::parser::{parse, AstNode, AST};
 use crate::{todo_feature, unrecoverable_error};
 use inkwell::attributes::AttributeLoc;
 use inkwell::builder::Builder;
@@ -322,6 +324,27 @@ impl<'ctx> CodeGen<'ctx> {
         self.module
             .add_function("printf", func_type, Some(Linkage::External));
 
+        // bool_eq
+        let func_type = self
+            .context
+            .bool_type()
+            .fn_type(&[bool_type.into(), bool_type.into()], false);
+        let func = self.module.add_function("bool_eq", func_type, None);
+
+        self.builder
+            .position_at_end(self.context.append_basic_block(func, "entry"));
+
+        let lhs = func.get_nth_param(0).unwrap().into_int_value();
+        let rhs = func.get_nth_param(1).unwrap().into_int_value();
+
+        self.builder
+            .build_return(Some(&self.builder.build_int_compare(
+                inkwell::IntPredicate::EQ,
+                lhs,
+                rhs,
+                "eq",
+            )));
+
         // ==
         let func_type = self
             .context
@@ -343,25 +366,6 @@ impl<'ctx> CodeGen<'ctx> {
                 "eq",
             )));
 
-        let func_type = self
-            .context
-            .bool_type()
-            .fn_type(&[bool_type.into(), bool_type.into()], false);
-        let func = self.core.add_function("bool_eq", func_type, None);
-
-        self.builder
-            .position_at_end(self.context.append_basic_block(func, "entry"));
-
-        let lhs = func.get_nth_param(0).unwrap().into_int_value();
-        let rhs = func.get_nth_param(1).unwrap().into_int_value();
-
-        self.builder
-            .build_return(Some(&self.builder.build_int_compare(
-                inkwell::IntPredicate::EQ,
-                lhs,
-                rhs,
-                "eq",
-            )));
         // +
 
         let func_type = self
@@ -434,6 +438,20 @@ impl<'ctx> CodeGen<'ctx> {
         self.builder
             .build_return(Some(&self.builder.build_int_signed_div(lhs, rhs, "div")));
 
+        let core = if is_core_installed() {
+            fs::read_to_string(get_core_path())
+        } else {
+            install_core().unwrap();
+            fs::read_to_string(get_core_path())
+        }
+        .unwrap();
+
+        let parsed = parse(&core).unwrap();
+
+        parsed.iter().cloned().for_each(|n| {
+            self.compile_astnode(n).unwrap();
+        });
+
         self.module.link_in_module(self.core.clone()).unwrap();
     }
 
@@ -460,15 +478,9 @@ impl<'ctx> CodeGen<'ctx> {
 
     pub fn compile(&self, ast: AST) {
         self.add_default_functions();
-        ast.iter()
-            .filter(|n| !matches!(n, AstNode::Eoi))
-            .cloned()
-            .collect::<Vec<_>>()
-            .iter()
-            .cloned()
-            .for_each(|n| {
-                self.compile_astnode(n).unwrap();
-            });
+        ast.iter().cloned().for_each(|n| {
+            self.compile_astnode(n).unwrap();
+        });
     }
 
     /// # Safety

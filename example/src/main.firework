@@ -1,3 +1,2 @@
-let bool_to_string (a: bool): str = if bool_eq(a, true) do "true" else "false"
-let one_eq_two: bool = ==(1, 2)
-let main: i64 = printf("%s", bool_to_string(one_eq_two))
+let one_eq_two: bool = bool_eq(1, 2)
+let main: i64 = printf("%s", if bool_eq(one_eq_two, true) do "1 equal 2" else "1 does not equal 2")

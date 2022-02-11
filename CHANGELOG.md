@@ -1,7 +1,7 @@
 # Changelog
 All noteworth changes to this project will be mentioned in this file.
 
-[Latest Version](#v0.3.1)
+[Latest Version](#v0.3.4)
 
 # v0.1.1
 ### Changes
@@ -113,3 +113,6 @@ All noteworth changes to this project will be mentioned in this file.
 
 # v0.3.3
 - Fixed broken formatting in README.MD
+
+# v0.3.4
+- Many changes

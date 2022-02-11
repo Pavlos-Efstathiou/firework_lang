@@ -57,6 +57,7 @@ pub fn parse(input: &str) -> Result<AST, Error<Rule>> {
     Ok(FireworkParser::parse(Rule::program, input)?
         .into_iter()
         .map(build_ast)
+        .filter(|node| !matches!(node, Eoi))
         .collect::<AST>())
 }
 
