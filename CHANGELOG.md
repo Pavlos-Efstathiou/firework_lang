@@ -112,7 +112,11 @@ All noteworth changes to this project will be mentioned in this file.
 - Made so many changes
 
 # v0.3.3
+### Changes
 - Fixed broken formatting in README.MD
 
-# v0.3.4
-- Many changes
+
+# v0.3.5
+### Changes
+- Removed the Emacs mode
+- Added a shell script to edit CHANGELOG.MD, push to github and publish to cargo automatically

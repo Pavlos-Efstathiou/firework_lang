@@ -233,7 +233,6 @@ impl<'ctx> CodeGen<'ctx> {
 
     fn compile_function(&self, node: AstNode) -> FunctionValue<'ctx> {
         match node {
-            // TODO: Function Arguments
             AstNode::Fn {
                 name,
                 return_type,
