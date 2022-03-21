@@ -1,3 +1,4 @@
+# BEWARE! This project has failed, is archived and will probably will be rebuilt in Haskell!
 ## Firework programming language
 
 [![Test Status](https://github.com/Pavlos-Efstathiou/firework_lang/workflows/Rust/badge.svg?event=push)](https://github.com/Pavlos-Efstathiou/firework_lang/actions)

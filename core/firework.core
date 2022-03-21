@@ -1,1 +1,0 @@
-let bool_to_string (a: bool): str = if bool_eq(a, true) do "true" else "false"
